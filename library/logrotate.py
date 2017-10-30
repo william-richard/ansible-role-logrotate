@@ -113,6 +113,11 @@ options:
     required: false
     choices: [ "yes", "no" ]
     default: no
+  prerotate:
+    description:
+      - an array of commands to run in prerotate
+    required: false
+    default: null
   postrotate:
     description:
       - an array of commands to run in postrotate
@@ -244,6 +249,11 @@ def generate_config(module):
     options += [ '%s' % module.params.get('frequency') ]
     options += [ 'rotate %s' % module.params.get('rotate') ]
 
+    if module.params.get('prerotate'):
+        options += [ 'prerotate' ]
+        options += map(lambda x: "  %s" % x, module.params.get('prerotate'))
+        options += [ 'endscript' ]
+
     if module.params.get('postrotate'):
         if module.params.get('sharedscripts'):
             options += [ 'sharedscripts' ]
@@ -306,6 +316,7 @@ def main():
         missingok       = dict(required=False, default='yes', type='bool'),
         sharedscripts   = dict(required=False, default='yes', type='bool'),
         notifempty      = dict(required=False, default='no', type='bool'),
+        prerotate       = dict(required=False, type='list'),
         postrotate      = dict(required=False, type='list'),
         config_dir      = dict(required=False, default='/etc/logrotate.d'),
         create          = dict(required=False),
